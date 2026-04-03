@@ -1,0 +1,236 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand */
+  --gc-primary: #0b1f2a; /* deep teal-navy */
+  --gc-primary-2: #07141c;
+  --gc-accent: #15b9c6; /* teal glow */
+  --gc-accent-2: #22c55e;
+  --gc-accent-soft: rgba(21, 185, 198, 0.18);
+
+  /* Surfaces (light) — خلفية فاتحة وهادئة */
+  --background: #f4fbfb;
+  --foreground: #0b1220;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-2: #ffffff;
+  --border: rgba(7, 89, 96, 0.12);
+  --muted: rgba(15, 23, 42, 0.58);
+
+  /* Focus */
+  --ring: rgba(21, 185, 198, 0.35);
+
+  /* Shape */
+  --radius: 16px;
+  --radius-sm: 12px;
+  --shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-cairo);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Surfaces (dark) */
+    --background: #041017;
+    --foreground: #e5f6f7;
+    --surface: rgba(6, 26, 34, 0.72);
+    --surface-2: rgba(6, 26, 34, 0.55);
+    --border: rgba(45, 212, 191, 0.20);
+    --muted: rgba(226, 255, 255, 0.72);
+    --ring: rgba(45, 212, 191, 0.22);
+    --shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Polished defaults */
+:focus-visible {
+  outline: none;
+}
+
+/* خلفية التطبيق — فاتحة بالكامل مع لمسة تركواز خفيفة */
+.gc-app {
+  min-height: 100vh;
+  background:
+    radial-gradient(800px 420px at 20% 0%, rgba(21, 185, 198, 0.08), transparent 55%),
+    radial-gradient(700px 380px at 85% 15%, rgba(56, 189, 248, 0.06), transparent 55%),
+    linear-gradient(180deg, #fafefd 0%, var(--background) 45%, #f0f9f9 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .gc-app {
+    background:
+      radial-gradient(800px 420px at 20% 0%, rgba(21, 185, 198, 0.12), transparent 55%),
+      radial-gradient(700px 380px at 85% 15%, rgba(56, 189, 248, 0.08), transparent 55%),
+      linear-gradient(180deg, rgba(3, 28, 38, 1) 0%, rgba(4, 16, 23, 1) 100%);
+  }
+}
+
+/* Landing page helpers */
+.gc-glass {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.gc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  padding: 0 18px;
+  height: 44px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: filter 150ms ease, transform 150ms ease, background-color 150ms ease;
+}
+
+.gc-btn:active {
+  transform: translateY(1px);
+}
+
+.gc-btn-primary {
+  color: white;
+  background: linear-gradient(270deg, var(--gc-accent), var(--gc-primary));
+  box-shadow: 0 12px 35px rgba(21, 185, 198, 0.24);
+}
+
+.gc-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.gc-btn-secondary {
+  color: var(--foreground);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.gc-btn-secondary:hover {
+  background: var(--surface-2);
+}
+
+.gc-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.gc-nav-link:hover {
+  background: var(--surface-2);
+  color: var(--foreground);
+}
+
+.gc-pill {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.gc-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  transition: filter 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+
+.gc-pill-btn:active {
+  transform: translateY(1px);
+}
+
+.gc-pill-btn-outline {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.gc-pill-btn-outline:hover {
+  background: var(--surface-2);
+}
+
+.gc-pill-btn-solid {
+  background: rgba(9, 40, 52, 0.85);
+  color: white;
+}
+
+.gc-pill-btn-solid:hover {
+  filter: brightness(1.08);
+}
+
+/* شريط خطوات فاتح (بدل الشريط الداكن) */
+.gc-steps-strip {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(232, 248, 248, 0.65) 100%
+  );
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.gc-step-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--foreground);
+  font-weight: 800;
+  font-size: 0.9375rem;
+}
+
+.gc-step-line {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(21, 185, 198, 0.45), transparent);
+}
+
+/* Form controls: global consistent theme */
+input:not([type="file"]),
+textarea,
+select {
+  background: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+input:not([type="file"]):focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}

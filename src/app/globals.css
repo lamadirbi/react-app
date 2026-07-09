@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* الوضع الفاتح فقط — لا يتأثر بإعدادات النظام الليلية */
+@custom-variant dark (&:not(*));
+
+html {
+  color-scheme: light;
+}
+
 :root {
   /* Brand */
   --gc-primary: #0b1f2a; /* deep teal-navy */
@@ -32,20 +39,6 @@
   --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Surfaces (dark) */
-    --background: #041017;
-    --foreground: #e5f6f7;
-    --surface: rgba(6, 26, 34, 0.72);
-    --surface-2: rgba(6, 26, 34, 0.55);
-    --border: rgba(45, 212, 191, 0.20);
-    --muted: rgba(226, 255, 255, 0.72);
-    --ring: rgba(45, 212, 191, 0.22);
-    --shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
@@ -64,15 +57,6 @@ body {
     radial-gradient(800px 420px at 20% 0%, rgba(21, 185, 198, 0.08), transparent 55%),
     radial-gradient(700px 380px at 85% 15%, rgba(56, 189, 248, 0.06), transparent 55%),
     linear-gradient(180deg, #fafefd 0%, var(--background) 45%, #f0f9f9 100%);
-}
-
-@media (prefers-color-scheme: dark) {
-  .gc-app {
-    background:
-      radial-gradient(800px 420px at 20% 0%, rgba(21, 185, 198, 0.12), transparent 55%),
-      radial-gradient(700px 380px at 85% 15%, rgba(56, 189, 248, 0.08), transparent 55%),
-      linear-gradient(180deg, rgba(3, 28, 38, 1) 0%, rgba(4, 16, 23, 1) 100%);
-  }
 }
 
 /* Landing page helpers */
@@ -1095,22 +1079,6 @@ textarea::placeholder {
     width: 2.5rem;
     justify-content: center;
     padding: 0;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .gc-back-btn {
-    color: #8de8ef;
-    box-shadow: none;
-  }
-
-  .gc-back-btn:hover {
-    color: #b8f4f8;
-    box-shadow: 0 8px 22px rgba(21, 185, 198, 0.18);
-  }
-
-  .gc-back-btn-icon {
-    color: #8de8ef;
   }
 }
 

@@ -35,7 +35,7 @@ export default function RootLayout({
       dir="rtl"
       className={`${cairo.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col text-zinc-900 dark:text-zinc-50">
+      <body className="min-h-full flex flex-col text-zinc-900">
         <div className="gc-app relative flex min-h-screen flex-col">
           {children}
         </div>

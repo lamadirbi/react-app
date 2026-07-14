@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { apiFetch, getToken, setToken } from "@/lib/api";
 
 export type MeUser = {
@@ -24,18 +24,50 @@ export type MeUser = {
 };
 type MeResponse = { user: MeUser };
 
+const SESSION_STORAGE_KEY = "gc_session_user";
+
 let sessionUser: MeUser | null = null;
 
-export function getAuthSession() {
+function readStoredSession(): MeUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as MeUser;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredSession(user: MeUser | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (!user) localStorage.removeItem(SESSION_STORAGE_KEY);
+    else localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+function hydrateSession(): MeUser | null {
+  if (sessionUser) return sessionUser;
+  const stored = readStoredSession();
+  if (stored) sessionUser = stored;
   return sessionUser;
+}
+
+export function getAuthSession() {
+  return hydrateSession();
 }
 
 export function setAuthSession(user: MeUser | null) {
   sessionUser = user;
+  writeStoredSession(user);
 }
 
 export function clearAuthSession() {
   sessionUser = null;
+  writeStoredSession(null);
 }
 
 export function logoutAndRedirect(to = "/login") {
@@ -59,18 +91,29 @@ export function isVerifiedPhysician(user: MeUser | null | undefined) {
   return profile?.verification_status === "approved";
 }
 
+function applyRoleGuard(user: MeUser, allowedRoles?: string[]) {
+  if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    window.location.href = routeForRole(user.role);
+    return false;
+  }
+  return true;
+}
+
 export function useRequireAuth(options?: {
   allowedRoles?: string[];
   redirectTo?: string;
 }) {
   const redirectTo = options?.redirectTo ?? "/login";
-  const allowedRoles = options?.allowedRoles;
+  const allowedRolesKey = options?.allowedRoles?.slice().sort().join(",") ?? "";
+  const allowedRoles = useMemo(
+    () => (allowedRolesKey ? allowedRolesKey.split(",") : undefined),
+    [allowedRolesKey],
+  );
 
-  const [user, setUser] = useState<MeUser | null>(sessionUser);
+  const [user, setUser] = useState<MeUser | null>(() => hydrateSession());
   const [loading, setLoading] = useState(() => {
-    if (sessionUser) return false;
-    if (typeof window === "undefined") return true;
-    return Boolean(getToken());
+    if (hydrateSession() && getToken()) return false;
+    return true;
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -85,12 +128,10 @@ export function useRequireAuth(options?: {
       return;
     }
 
-    if (sessionUser) {
-      if (allowedRoles && !allowedRoles.includes(sessionUser.role)) {
-        window.location.href = routeForRole(sessionUser.role);
-        return;
-      }
-      setUser(sessionUser);
+    const cached = hydrateSession();
+    if (cached) {
+      if (!applyRoleGuard(cached, allowedRoles)) return;
+      setUser(cached);
       setLoading(false);
     }
 
@@ -99,30 +140,47 @@ export function useRequireAuth(options?: {
         if (!mounted) return;
 
         if (!res.ok) {
-          clearAuthSession();
-          setToken(null);
-          window.location.href = redirectTo;
+          // Only hard-logout on unauthorized. Keep the session on network/server blips.
+          if (res.status === 401) {
+            clearAuthSession();
+            setToken(null);
+            window.location.href = redirectTo;
+            return;
+          }
+
+          const fallback = hydrateSession();
+          if (fallback) {
+            if (!applyRoleGuard(fallback, allowedRoles)) return;
+            setUser(fallback);
+            setLoading(false);
+            setError(res.message);
+            return;
+          }
+
+          setLoading(false);
+          setError(res.message || "فشل التحقق من الجلسة");
           return;
         }
 
         const u = res.data.user;
-        if (allowedRoles && !allowedRoles.includes(u.role)) {
-          window.location.href = routeForRole(u.role);
-          return;
-        }
+        if (!applyRoleGuard(u, allowedRoles)) return;
 
         setAuthSession(u);
         setUser(u);
+        setError(null);
         setLoading(false);
       })
       .catch(() => {
         if (!mounted) return;
-        if (!sessionUser) {
+        const fallback = hydrateSession();
+        if (fallback) {
+          if (!applyRoleGuard(fallback, allowedRoles)) return;
+          setUser(fallback);
           setLoading(false);
-          setError("فشل التحقق من الجلسة");
           return;
         }
         setLoading(false);
+        setError("فشل التحقق من الجلسة");
       });
 
     return () => {
@@ -132,4 +190,3 @@ export function useRequireAuth(options?: {
 
   return { user, loading, error };
 }
-

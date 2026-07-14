@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
-import { isVerifiedPhysician, physicianProfileOf, useRequireAuth } from "@/lib/auth";
+import { isVerifiedPhysician, physicianProfileOf, setAuthSession, useRequireAuth, getAuthSession } from "@/lib/auth";
 import { AppHeader } from "@/components/AppHeader";
 import { PageLoadingGate } from "@/components/PageLoadingGate";
 import { Alert } from "@/components/ui/Alert";
@@ -128,22 +128,37 @@ export default function PhysicianDashboardPage() {
         ) : null}
 
         <div className="grid gap-6">
-          <PhysicianProfilePanel initialProfile={profile} />
+          <PhysicianProfilePanel
+            initialProfile={profile}
+            verificationStatus={profile?.verification_status}
+            rejectionReason={profile?.rejection_reason}
+            onVerificationChange={({ verification_status, rejection_reason }) => {
+              const current = getAuthSession();
+              if (!current) return;
+              const nextProfile = {
+                ...(current.physician_profile ?? current.physicianProfile ?? {}),
+                specialty:
+                  current.physician_profile?.specialty ??
+                  current.physicianProfile?.specialty ??
+                  profile?.specialty ??
+                  "",
+                certificate:
+                  current.physician_profile?.certificate ??
+                  current.physicianProfile?.certificate ??
+                  profile?.certificate ??
+                  "",
+                verification_status,
+                rejection_reason,
+              };
+              setAuthSession({
+                ...current,
+                physician_profile: nextProfile,
+                physicianProfile: nextProfile,
+              });
+            }}
+          />
 
-          {!verified ? (
-            <Alert variant="info">
-              {profile?.verification_status === "rejected" ? (
-                <>
-                  تم رفض طلب التوثيق.{" "}
-                  {profile.rejection_reason ? `السبب: ${profile.rejection_reason}` : ""}
-                </>
-              ) : (
-                <>
-                  حسابك بانتظار موافقة الإدارة. لن تتمكن من عرض الحالات أو استلام الاستشارات حتى يتم توثيقك.
-                </>
-              )}
-            </Alert>
-          ) : (
+          {verified ? (
             <>
               <PhysicianQueueSection
                 queue={queue}
@@ -163,7 +178,7 @@ export default function PhysicianDashboardPage() {
 
               <PhysicianCompletedSection items={completedMine} loading={loading} error={error} />
             </>
-          )}
+          ) : null}
         </div>
       </main>
     </div>

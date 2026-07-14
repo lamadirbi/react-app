@@ -1133,3 +1133,66 @@ textarea::placeholder {
     justify-content: flex-end;
   }
 }
+
+.gc-reject-modal {
+  width: min(100%, 28rem);
+}
+
+.gc-reject-modal-field {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.gc-reject-modal-field > span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.gc-reject-modal-textarea {
+  width: 100%;
+  min-height: 6.5rem;
+  resize: vertical;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.75rem 0.9rem;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--foreground);
+  outline: none;
+}
+
+.gc-reject-modal-textarea:focus {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.gc-reject-banner {
+  border-radius: 18px;
+  border: 1px solid rgba(185, 28, 28, 0.25);
+  background: linear-gradient(180deg, rgba(254, 226, 226, 0.75), rgba(255, 255, 255, 0.9));
+  padding: 1rem 1.1rem;
+}
+
+.gc-reject-banner-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.gc-reject-banner-reason {
+  margin: 0.55rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #7f1d1d;
+}
+
+.gc-reject-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}

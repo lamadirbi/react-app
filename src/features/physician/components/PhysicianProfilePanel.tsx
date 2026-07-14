@@ -22,6 +22,8 @@ type PhysicianProfile = {
   certificate_file_ids?: number[];
   certificateFile?: CertificateFileRef | null;
   certificateFiles?: CertificateFileRef[];
+  verification_status?: string | null;
+  rejection_reason?: string | null;
 };
 type PhysicianProfileResponse = { profile: PhysicianProfile };
 
@@ -60,20 +62,55 @@ function normalizePhysicianProfile(raw: any): PhysicianProfile {
     certificate_file_ids,
     certificateFile: certificateFiles[0] ?? null,
     certificateFiles,
+    verification_status: raw?.verification_status ?? null,
+    rejection_reason: raw?.rejection_reason ?? null,
   };
 }
 
-export function PhysicianProfilePanel({ initialProfile }: { initialProfile?: any }) {
+type Props = {
+  initialProfile?: any;
+  verificationStatus?: string | null;
+  rejectionReason?: string | null;
+  onVerificationChange?: (next: {
+    verification_status: string;
+    rejection_reason: string | null;
+  }) => void;
+};
+
+export function PhysicianProfilePanel({
+  initialProfile,
+  verificationStatus,
+  rejectionReason,
+  onVerificationChange,
+}: Props) {
   const [profile, setProfile] = useState<PhysicianProfile | null>(() =>
     initialProfile ? normalizePhysicianProfile(initialProfile) : null,
   );
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [resubmitting, setResubmitting] = useState(false);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
   const [certificateUploading, setCertificateUploading] = useState(false);
   const [certPreviewMap, setCertPreviewMap] = useState<
     Record<number, { url: string; kind: "image" | "pdf" }>
   >({});
+  const [localStatus, setLocalStatus] = useState<string | null | undefined>(
+    verificationStatus ?? initialProfile?.verification_status,
+  );
+  const [localReason, setLocalReason] = useState<string | null | undefined>(
+    rejectionReason ?? initialProfile?.rejection_reason,
+  );
+
+  useEffect(() => {
+    setLocalStatus(verificationStatus ?? profile?.verification_status);
+  }, [verificationStatus, profile?.verification_status]);
+
+  useEffect(() => {
+    setLocalReason(rejectionReason ?? profile?.rejection_reason);
+  }, [rejectionReason, profile?.rejection_reason]);
+
+  const isRejected = localStatus === "rejected";
+  const isPending = localStatus === "pending";
 
   const certificateList = useMemo(() => {
     if (!profile) return [];
@@ -90,7 +127,10 @@ export function PhysicianProfilePanel({ initialProfile }: { initialProfile?: any
       .then((res) => {
         if (!mounted) return;
         if (!res.ok) return;
-        setProfile(normalizePhysicianProfile(res.data.profile));
+        const next = normalizePhysicianProfile(res.data.profile);
+        setProfile(next);
+        if (next.verification_status) setLocalStatus(next.verification_status);
+        if (next.rejection_reason !== undefined) setLocalReason(next.rejection_reason);
       })
       .catch(() => {});
     return () => {
@@ -155,9 +195,11 @@ export function PhysicianProfilePanel({ initialProfile }: { initialProfile?: any
     };
   }, [certFilesKey, certificateList]);
 
-  async function saveProfile() {
+  async function saveProfile(options?: { resubmit?: boolean }) {
     if (!profile) return;
-    setSavingProfile(true);
+    const resubmit = Boolean(options?.resubmit);
+    if (resubmit) setResubmitting(true);
+    else setSavingProfile(true);
     setProfileMsg(null);
     const ids = certificateList.map((f) => f.id);
     const res = await apiFetch<PhysicianProfileResponse>("/physician-profile", {
@@ -166,15 +208,30 @@ export function PhysicianProfilePanel({ initialProfile }: { initialProfile?: any
         specialty: profile.specialty,
         certificate: profile.certificate ?? "",
         certificate_file_ids: ids,
+        resubmit: resubmit || undefined,
       }),
     });
     setSavingProfile(false);
+    setResubmitting(false);
     if (!res.ok) {
       setProfileMsg(res.message);
       return;
     }
-    setProfile(normalizePhysicianProfile(res.data.profile));
-    setProfileMsg("تم حفظ معلومات الطبيب");
+    const next = normalizePhysicianProfile(res.data.profile);
+    setProfile(next);
+    const status = next.verification_status ?? (resubmit ? "pending" : localStatus) ?? "pending";
+    const reason = next.rejection_reason ?? (resubmit ? null : localReason) ?? null;
+    setLocalStatus(status);
+    setLocalReason(reason);
+    onVerificationChange?.({
+      verification_status: status,
+      rejection_reason: reason,
+    });
+    setProfileMsg(
+      resubmit
+        ? "تم إرسال طلب التوثيق مجدداً. ستظهر حالتك بانتظار المراجعة."
+        : "تم حفظ معلومات الطبيب",
+    );
     setEditingProfile(false);
   }
 
@@ -271,7 +328,7 @@ export function PhysicianProfilePanel({ initialProfile }: { initialProfile?: any
               تظهر للمراجع عند الرد على الاستشارة.
             </p>
           </div>
-          {profile ? (
+          {profile && !isRejected ? (
             <Button
               type="button"
               variant={editingProfile ? "secondary" : "primary"}
@@ -285,6 +342,45 @@ export function PhysicianProfilePanel({ initialProfile }: { initialProfile?: any
             </Button>
           ) : null}
         </div>
+
+        {isRejected ? (
+          <div className="gc-reject-banner mt-4">
+            <h3 className="gc-reject-banner-title">تم رفض طلب التوثيق</h3>
+            <p className="gc-reject-banner-reason">
+              <span className="font-semibold">سبب الرفض: </span>
+              {localReason?.trim() || "لم تُذكر تفاصيل إضافية من الإدارة."}
+            </p>
+            <div className="gc-reject-banner-actions">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setProfileMsg(null);
+                  setEditingProfile(true);
+                }}
+              >
+                تعديل البيانات
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={resubmitting || !profile?.specialty?.trim()}
+                onClick={() => void saveProfile({ resubmit: true })}
+              >
+                {resubmitting ? "جاري الإرسال..." : "إرسال طلب مجدداً"}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
+        {isPending && !isRejected ? (
+          <div className="mt-4">
+            <Alert variant="info">
+              حسابك بانتظار موافقة الإدارة. لن تتمكن من عرض الحالات أو استلام الاستشارات حتى يتم توثيقك.
+            </Alert>
+          </div>
+        ) : null}
 
         {profileMsg ? (
           <div className="mt-4">
@@ -366,7 +462,7 @@ export function PhysicianProfilePanel({ initialProfile }: { initialProfile?: any
               </div>
             ) : (
               <p className="mt-5 rounded-xl border border-dashed border-(--border) bg-(--surface-2) px-4 py-3 text-xs text-(--muted)">
-                لا توجد شهادات مرفقة. يمكنك إضافتها من «تعديل الملف».
+                لا توجد شهادات مرفقة. يمكنك إضافتها من «تعديل البيانات».
               </p>
             )}
 
@@ -463,13 +559,25 @@ export function PhysicianProfilePanel({ initialProfile }: { initialProfile?: any
                   >
                     إلغاء
                   </Button>
-                  <Button
-                    type="button"
-                    onClick={saveProfile}
-                    disabled={savingProfile || !profile?.specialty?.trim()}
-                  >
-                    {savingProfile ? "جاري الحفظ..." : "حفظ التعديل"}
-                  </Button>
+                  {isRejected ? (
+                    <Button
+                      type="button"
+                      onClick={() => void saveProfile({ resubmit: true })}
+                      disabled={savingProfile || resubmitting || !profile?.specialty?.trim()}
+                    >
+                      {resubmitting || savingProfile
+                        ? "جاري الإرسال..."
+                        : "حفظ وإرسال الطلب مجدداً"}
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={() => void saveProfile()}
+                      disabled={savingProfile || !profile?.specialty?.trim()}
+                    >
+                      {savingProfile ? "جاري الحفظ..." : "حفظ التعديل"}
+                    </Button>
+                  )}
                 </div>
               </div>
             ) : null}

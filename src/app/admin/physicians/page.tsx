@@ -8,6 +8,7 @@ import { PageLoadingGate } from "@/components/PageLoadingGate";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
+import { RejectReasonModal } from "@/components/ui/RejectReasonModal";
 import { triggerBlobDownload } from "@/components/BlobDownload";
 
 type CertificateFile = {
@@ -90,6 +91,7 @@ export default function AdminPhysiciansPage() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState("pending");
+  const [rejectTarget, setRejectTarget] = useState<{ id: number; name: string } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -124,19 +126,19 @@ export default function AdminPhysiciansPage() {
     await load();
   }
 
-  async function reject(id: number) {
-    const reason = window.prompt("سبب الرفض (اختياري):") ?? "";
+  async function reject(id: number, reason: string) {
     setBusyId(id);
     setError(null);
     const res = await apiFetch(`/admin/physicians/${id}/reject`, {
       method: "POST",
-      body: JSON.stringify({ reason: reason || undefined }),
+      body: JSON.stringify({ reason }),
     });
     setBusyId(null);
     if (!res.ok) {
       setError(res.message);
       return;
     }
+    setRejectTarget(null);
     await load();
   }
 
@@ -247,7 +249,12 @@ export default function AdminPhysiciansPage() {
                                 size="sm"
                                 variant="secondary"
                                 disabled={busyId === row.id}
-                                onClick={() => reject(row.id)}
+                                onClick={() =>
+                                  setRejectTarget({
+                                    id: row.id,
+                                    name: row.user?.name ?? "طبيب",
+                                  })
+                                }
                               >
                                 رفض الطلب
                               </Button>
@@ -336,6 +343,20 @@ export default function AdminPhysiciansPage() {
           </CardBody>
         </Card>
       </main>
+
+      <RejectReasonModal
+        open={Boolean(rejectTarget)}
+        physicianName={rejectTarget?.name}
+        busy={busyId !== null && busyId === rejectTarget?.id}
+        onClose={() => {
+          if (busyId !== null) return;
+          setRejectTarget(null);
+        }}
+        onConfirm={(reason) => {
+          if (!rejectTarget) return;
+          void reject(rejectTarget.id, reason);
+        }}
+      />
     </div>
     </PageLoadingGate>
   );

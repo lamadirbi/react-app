@@ -87,7 +87,7 @@ export default function LoginPage() {
                   inputMode="email"
                   autoComplete="email"
                   required
-                  placeholder="name@example.com"
+                  placeholder="أدخل بريدك الإلكتروني"
                   className="h-11 rounded-xl border border-(--border) bg-(--surface) px-3 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-(--ring) dark:text-zinc-50"
                 />
               </label>

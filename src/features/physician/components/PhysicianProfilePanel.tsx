@@ -343,48 +343,11 @@ export function PhysicianProfilePanel({
           ) : null}
         </div>
 
-        {isRejected ? (
-          <div className="gc-reject-banner mt-4">
-            <h3 className="gc-reject-banner-title">تم رفض طلب التوثيق</h3>
-            <p className="gc-reject-banner-reason">
-              <span className="font-semibold">سبب الرفض: </span>
-              {localReason?.trim() || "لم تُذكر تفاصيل إضافية من الإدارة."}
-            </p>
-            <div className="gc-reject-banner-actions">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setProfileMsg(null);
-                  setEditingProfile(true);
-                }}
-              >
-                تعديل البيانات
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                disabled={resubmitting || !profile?.specialty?.trim()}
-                onClick={() => void saveProfile({ resubmit: true })}
-              >
-                {resubmitting ? "جاري الإرسال..." : "إرسال طلب مجدداً"}
-              </Button>
-            </div>
-          </div>
-        ) : null}
-
         {isPending && !isRejected ? (
           <div className="mt-4">
             <Alert variant="info">
               حسابك بانتظار موافقة الإدارة. لن تتمكن من عرض الحالات أو استلام الاستشارات حتى يتم توثيقك.
             </Alert>
-          </div>
-        ) : null}
-
-        {profileMsg ? (
-          <div className="mt-4">
-            <Alert variant={profileMsg.includes("تم") ? "success" : "info"}>{profileMsg}</Alert>
           </div>
         ) : null}
 
@@ -465,6 +428,43 @@ export function PhysicianProfilePanel({
                 لا توجد شهادات مرفقة. يمكنك إضافتها من «تعديل البيانات».
               </p>
             )}
+
+            {isRejected ? (
+              <div className="gc-reject-banner mt-5">
+                <h3 className="gc-reject-banner-title">تم رفض طلب التوثيق</h3>
+                <p className="gc-reject-banner-reason">
+                  <span className="font-semibold">سبب الرفض: </span>
+                  {localReason?.trim() || "لم تُذكر تفاصيل إضافية من الإدارة."}
+                </p>
+                <div className="gc-reject-banner-actions">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setProfileMsg(null);
+                      setEditingProfile(true);
+                    }}
+                  >
+                    تعديل البيانات
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={resubmitting || !profile?.specialty?.trim()}
+                    onClick={() => void saveProfile({ resubmit: true })}
+                  >
+                    {resubmitting ? "جاري الإرسال..." : "إرسال طلب مجدداً"}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
+            {profileMsg ? (
+              <div className="mt-4">
+                <Alert variant={profileMsg.includes("تم") ? "success" : "info"}>{profileMsg}</Alert>
+              </div>
+            ) : null}
 
             {editingProfile ? (
               <div className="gc-physician-edit-panel grid gap-4">

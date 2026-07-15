@@ -730,6 +730,42 @@ textarea::placeholder {
   background: #fee2e2;
 }
 
+/* ── Admin physician certificate attachments (mobile) ── */
+
+.gc-admin-cert-file {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 0.65rem 0.7rem;
+}
+
+.gc-admin-cert-file-thumb {
+  display: inline-flex;
+  height: 2.4rem;
+  width: 2.4rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--gc-accent) 22%, var(--border));
+  background: color-mix(in srgb, var(--gc-accent-soft) 55%, var(--surface));
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #0b6e7a;
+}
+
+.gc-admin-cert-file-action {
+  flex-shrink: 0 !important;
+  width: auto !important;
+  min-width: 3.5rem;
+  padding-inline: 0.7rem !important;
+}
+
 .gc-form-submit-bar {
   display: flex;
   flex-direction: column-reverse;

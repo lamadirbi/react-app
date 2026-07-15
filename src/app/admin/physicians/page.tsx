@@ -219,9 +219,11 @@ export default function AdminPhysiciansPage() {
                               ) : null}
                             </div>
                             <div className="mt-2 grid gap-1 text-sm text-zinc-600 dark:text-zinc-400">
-                              <div>
+                              <div className="min-w-0">
                                 <span className="font-medium text-zinc-700 dark:text-zinc-300">البريد:</span>{" "}
-                                <span dir="ltr">{row.user?.email}</span>
+                                <span className="break-all" dir="ltr">
+                                  {row.user?.email}
+                                </span>
                               </div>
                               {row.user?.phone ? (
                                 <div>
@@ -263,32 +265,32 @@ export default function AdminPhysiciansPage() {
                         </div>
 
                         <div className="grid gap-5 p-5 lg:grid-cols-2">
-                          <section className="rounded-2xl border border-(--border) bg-(--surface) p-4">
+                          <section className="min-w-0 rounded-2xl border border-(--border) bg-(--surface) p-4">
                             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                               المؤهل والتخصص
                             </h3>
                             <dl className="mt-3 space-y-3 text-sm">
                               <div>
                                 <dt className="text-xs font-medium text-zinc-500">التخصص</dt>
-                                <dd className="mt-1 font-medium text-zinc-900 dark:text-zinc-50">
+                                <dd className="mt-1 break-words font-medium text-zinc-900 dark:text-zinc-50">
                                   {row.specialty}
                                 </dd>
                               </div>
                               <div>
                                 <dt className="text-xs font-medium text-zinc-500">وصف الشهادة / المؤهل</dt>
-                                <dd className="mt-1 whitespace-pre-wrap leading-6 text-zinc-700 dark:text-zinc-300">
+                                <dd className="mt-1 whitespace-pre-wrap break-words leading-6 text-zinc-700 dark:text-zinc-300">
                                   {row.certificate}
                                 </dd>
                               </div>
                             </dl>
                           </section>
 
-                          <section className="rounded-2xl border border-(--border) bg-(--surface) p-4">
+                          <section className="min-w-0 rounded-2xl border border-(--border) bg-(--surface) p-4">
                             <div className="flex items-center justify-between gap-2">
                               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                                 مرفقات الشهادة
                               </h3>
-                              <span className="text-xs text-zinc-500">{files.length} ملف</span>
+                              <span className="shrink-0 text-xs text-zinc-500">{files.length} ملف</span>
                             </div>
 
                             {files.length === 0 ? (
@@ -296,31 +298,38 @@ export default function AdminPhysiciansPage() {
                                 لا توجد مرفقات مرفوعة لهذا الطبيب.
                               </p>
                             ) : (
-                              <ul className="mt-3 space-y-2">
+                              <ul className="mt-3 grid gap-2">
                                 {files.map((file) => (
                                   <li
                                     key={file.id}
-                                    className="flex flex-col gap-3 rounded-xl border border-(--border) bg-(--surface-2) p-3 sm:flex-row sm:items-center sm:justify-between"
+                                    className="gc-admin-cert-file"
                                   >
-                                    <div className="min-w-0">
-                                      <div className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                                    <div className="gc-admin-cert-file-thumb" aria-hidden>
+                                      {fileKindLabel(file.file_kind, file.mime_type) === "PDF" ? "PDF" : "IMG"}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <div
+                                        className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50"
+                                        title={file.original_name}
+                                        dir="auto"
+                                      >
                                         {file.original_name}
                                       </div>
-                                      <div className="mt-1 flex flex-wrap gap-2 text-xs text-zinc-500">
+                                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-zinc-500">
                                         <span>{fileKindLabel(file.file_kind, file.mime_type)}</span>
-                                        <span>•</span>
-                                        <span>{formatBytes(file.size_bytes)}</span>
+                                        <span aria-hidden>·</span>
+                                        <span dir="ltr">{formatBytes(file.size_bytes)}</span>
                                       </div>
                                     </div>
                                     <Button
                                       type="button"
                                       size="sm"
                                       variant="secondary"
-                                      className="w-full sm:w-auto"
+                                      className="gc-admin-cert-file-action"
                                       disabled={downloadingId === file.id}
                                       onClick={() => downloadFile(file.id, file.original_name)}
                                     >
-                                      {downloadingId === file.id ? "جاري التنزيل..." : "تنزيل"}
+                                      {downloadingId === file.id ? "..." : "تنزيل"}
                                     </Button>
                                   </li>
                                 ))}
@@ -330,8 +339,9 @@ export default function AdminPhysiciansPage() {
                         </div>
 
                         {row.rejection_reason ? (
-                          <div className="border-t border-(--border) bg-red-50 px-5 py-4 text-sm text-red-700 dark:bg-red-950/20 dark:text-red-300">
-                            <span className="font-semibold">سبب الرفض:</span> {row.rejection_reason}
+                          <div className="border-t border-(--border) bg-red-50 px-4 py-3 text-sm leading-6 text-red-700 dark:bg-red-950/20 dark:text-red-300 sm:px-5 sm:py-4">
+                            <span className="font-semibold">سبب الرفض:</span>{" "}
+                            <span className="break-words">{row.rejection_reason}</span>
                           </div>
                         ) : null}
                       </CardBody>

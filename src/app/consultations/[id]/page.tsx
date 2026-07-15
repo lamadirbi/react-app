@@ -297,7 +297,7 @@ export default function ConsultationDetailPage() {
                           />
 
                           {newFiles.length > 0 ? (
-                            <div className="rounded-2xl border border-(--border) bg-(--surface-2) p-4">
+                            <div className="min-w-0 overflow-hidden rounded-2xl border border-(--border) bg-(--surface-2) p-3 sm:p-4">
                               <div className="mb-2 text-sm font-semibold text-foreground">
                                 ملفات جديدة
                               </div>

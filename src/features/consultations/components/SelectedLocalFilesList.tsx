@@ -43,7 +43,7 @@ function fileKindLabel(f: File) {
   return "مرفق";
 }
 
-/** يعرض ملفات تم اختيارها محلياً مع معاينة مصغّرة وترتيب مناسب للجوال */
+/** يعرض ملفات تم اختيارها محلياً مع قصّ آمن لأسماء الملفات الطويلة على الجوال */
 export function SelectedLocalFilesList({ files, onRemoveAt }: Props) {
   const key = useMemo(() => files.map((f, i) => slotKey(i, f)).join(","), [files]);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
@@ -65,64 +65,47 @@ export function SelectedLocalFilesList({ files, onRemoveAt }: Props) {
   }, [key]);
 
   return (
-    <ul className="grid gap-2.5">
+    <ul className="gc-selected-files">
       {files.map((f, idx) => {
         const slot = slotKey(idx, f);
         const previewUrl = isImageFile(f) ? previewUrls[slot] : null;
         const sizeLabel = formatBytes(f.size);
 
         return (
-          <li
-            key={slot}
-            className="rounded-xl border border-(--border) bg-(--surface) p-3"
-          >
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-(--border) bg-(--surface-2)">
-                {previewUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={previewUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 px-1 text-center">
-                    <span className="text-[10px] font-bold tracking-wide text-(--gc-accent)">
-                      {isPdfFile(f) ? "PDF" : "FILE"}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div
-                  className="truncate text-sm font-medium text-foreground"
-                  title={f.name}
-                  dir="auto"
-                >
-                  {f.name}
-                </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-(--muted)">
-                  <span>{fileKindLabel(f)}</span>
-                  {sizeLabel ? (
-                    <>
-                      <span aria-hidden>·</span>
-                      <span dir="ltr">{sizeLabel}</span>
-                    </>
-                  ) : null}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="gc-file-remove-btn shrink-0"
-                onClick={() => onRemoveAt(idx)}
-                aria-label={`حذف ${f.name}`}
-                title="حذف"
-              >
-                حذف
-              </button>
+          <li key={slot} className="gc-selected-file-row">
+            <div className="gc-selected-file-thumb" aria-hidden>
+              {previewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={previewUrl} alt="" />
+              ) : (
+                <span>{isPdfFile(f) ? "PDF" : "FILE"}</span>
+              )}
             </div>
+
+            <div className="gc-selected-file-meta">
+              <p className="gc-selected-file-name" title={f.name}>
+                {f.name}
+              </p>
+              <p className="gc-selected-file-sub">
+                <span>{fileKindLabel(f)}</span>
+                {sizeLabel ? (
+                  <>
+                    <span aria-hidden> · </span>
+                    <span dir="ltr">{sizeLabel}</span>
+                  </>
+                ) : null}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="gc-file-remove-btn"
+              onClick={() => onRemoveAt(idx)}
+              aria-label={`حذف ${f.name}`}
+              title="حذف"
+            >
+              حذف
+            </button>
           </li>
         );
       })}

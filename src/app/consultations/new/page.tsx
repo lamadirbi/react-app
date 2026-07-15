@@ -193,7 +193,7 @@ function NewConsultationContent() {
           </p>
         </header>
 
-        <form className="grid gap-5" onSubmit={submit}>
+        <form className="grid min-w-0 gap-5" onSubmit={submit}>
           <Card className="overflow-hidden">
             <div className="h-1 bg-gradient-to-l from-(--gc-accent) to-[#0b6e7a]" />
             <div className="p-5 sm:p-6">
@@ -303,8 +303,8 @@ function NewConsultationContent() {
             </div>
           </Card>
 
-          <Card className="overflow-hidden">
-            <div className="p-5 sm:p-6">
+          <Card className="min-w-0 overflow-hidden">
+            <div className="min-w-0 p-5 sm:p-6">
               <FormSectionHead
                 step={profile ? 4 : 3}
                 title="مرفقات (اختياري)"
@@ -340,7 +340,7 @@ function NewConsultationContent() {
               />
 
               {files.length ? (
-                <div className="mt-4 rounded-2xl border border-(--border) bg-(--surface-2) p-4">
+                <div className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-(--border) bg-(--surface-2) p-3 sm:p-4">
                   <div className="mb-2 text-sm font-semibold text-foreground">الملفات المحددة</div>
                   <SelectedLocalFilesList
                     files={files}

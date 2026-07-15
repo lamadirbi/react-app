@@ -730,6 +730,79 @@ textarea::placeholder {
   background: #fee2e2;
 }
 
+/* ── Selected local files (mobile-safe truncation) ── */
+
+.gc-selected-files {
+  display: grid;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.gc-selected-file-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.65rem 0.7rem;
+}
+
+.gc-selected-file-thumb {
+  display: inline-flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 0.625rem;
+  font-weight: 800;
+  color: #0b6e7a;
+}
+
+.gc-selected-file-thumb img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.gc-selected-file-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.gc-selected-file-name {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.gc-selected-file-sub {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.gc-file-remove-btn {
+  flex-shrink: 0;
+}
+
 /* ── Admin physician certificate attachments (mobile) ── */
 
 .gc-admin-cert-file {

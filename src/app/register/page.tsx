@@ -264,8 +264,8 @@ export default function RegisterPage() {
                 </div>
 
                 {certificateFiles.length > 0 ? (
-                  <Card className="bg-white dark:bg-zinc-950">
-                    <CardBody className="p-4 text-sm">
+                  <Card className="min-w-0 overflow-hidden bg-white dark:bg-zinc-950">
+                    <CardBody className="min-w-0 p-4 text-sm">
                       <div className="mb-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                         الملفات المختارة ({certificateFiles.length})
                       </div>

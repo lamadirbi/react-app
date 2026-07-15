@@ -21,6 +21,11 @@ function isImageFile(f: File) {
   return /\.(png|jpe?g|gif|webp|avif|bmp|svg)(\?|$)/i.test(f.name);
 }
 
+function isPdfFile(f: File) {
+  if (f.type?.toLowerCase() === "application/pdf") return true;
+  return f.name.toLowerCase().endsWith(".pdf");
+}
+
 function formatBytes(bytes: number) {
   if (!bytes) return "";
   const units = ["B", "KB", "MB", "GB"];
@@ -28,12 +33,18 @@ function formatBytes(bytes: number) {
   let i = 0;
   while (b >= 1024 && i < units.length - 1) {
     b /= 1024;
-    i++;
+    i += 1;
   }
   return `${b.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-/** يعرض ملفات تم اختيارها محلياً مع معاينة للصور + حذف */
+function fileKindLabel(f: File) {
+  if (isImageFile(f)) return "صورة";
+  if (isPdfFile(f)) return "PDF";
+  return "مرفق";
+}
+
+/** يعرض ملفات تم اختيارها محلياً مع معاينة مصغّرة وترتيب مناسب للجوال */
 export function SelectedLocalFilesList({ files, onRemoveAt }: Props) {
   const key = useMemo(() => files.map((f, i) => slotKey(i, f)).join(","), [files]);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
@@ -55,76 +66,69 @@ export function SelectedLocalFilesList({ files, onRemoveAt }: Props) {
   }, [key]);
 
   return (
-    <div className="grid gap-2">
+    <ul className="grid gap-2.5">
       {files.map((f, idx) => {
-        const isImg = isImageFile(f);
         const slot = slotKey(idx, f);
-        const previewUrl = isImg ? previewUrls[slot] : null;
-
-        if (isImg && previewUrl) {
-          return (
-            <LocalPreviewCard
-              key={slot}
-              previewUrl={previewUrl}
-              meta={`${formatBytes(f.size)}${f.type ? ` — ${f.type}` : ""}`}
-              onRemove={() => onRemoveAt(idx)}
-            />
-          );
-        }
+        const previewUrl = isImageFile(f) ? previewUrls[slot] : null;
+        const sizeLabel = formatBytes(f.size);
 
         return (
-          <div
+          <li
             key={slot}
-            className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-950"
+            className="rounded-xl border border-(--border) bg-(--surface) p-3"
           >
-            <div className="min-w-0">
-              <div className="truncate font-medium text-zinc-900 dark:text-zinc-50">{f.name}</div>
-              <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                <span dir="ltr">{formatBytes(f.size)}</span>
-                {f.type ? (
-                  <>
-                    {" "}
-                    — <span dir="ltr">{f.type}</span>
-                  </>
-                ) : null}
+            <div className="flex items-start gap-3">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-(--border) bg-(--surface-2)">
+                {previewUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 px-1 text-center">
+                    <span className="text-[10px] font-bold tracking-wide text-(--gc-accent)">
+                      {isPdfFile(f) ? "PDF" : "FILE"}
+                    </span>
+                    <span className="text-[10px] text-(--muted)">{fileKindLabel(f)}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div
+                  className="break-words text-sm font-medium leading-5 text-foreground"
+                  title={f.name}
+                >
+                  {f.name}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-(--muted)">
+                  <span>{fileKindLabel(f)}</span>
+                  {sizeLabel ? (
+                    <>
+                      <span aria-hidden>·</span>
+                      <span dir="ltr">{sizeLabel}</span>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
-            <Button type="button" variant="danger" size="sm" onClick={() => onRemoveAt(idx)}>
-              حذف
-            </Button>
-          </div>
+
+            <div className="mt-3 flex justify-stretch sm:justify-end">
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={() => onRemoveAt(idx)}
+              >
+                حذف
+              </Button>
+            </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }
-
-function LocalPreviewCard({
-  previewUrl,
-  meta,
-  onRemove,
-}: {
-  previewUrl: string;
-  meta: string;
-  onRemove: () => void;
-}) {
-  return (
-    <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-950">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={previewUrl}
-        alt=""
-        className="mx-auto max-h-56 w-full rounded-lg border border-zinc-200 object-contain dark:border-zinc-800"
-      />
-      <div className="flex items-center justify-between gap-3">
-        <div className="text-xs text-zinc-500 dark:text-zinc-400">
-          <span dir="ltr">{meta}</span>
-        </div>
-        <Button type="button" variant="danger" size="sm" onClick={onRemove}>
-          حذف
-        </Button>
-      </div>
-    </div>
-  );
-}
-

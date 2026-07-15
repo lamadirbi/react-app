@@ -203,9 +203,10 @@ export function AppHeader({ title, backHref, showBack = true, rightSlot, userRol
             onClick={goBack}
             className="gc-back-btn"
             aria-label="رجوع"
+            title="رجوع"
           >
             <span className="gc-back-btn-icon" aria-hidden>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
                 <path
                   d="M6.25 3.75L10.75 8L6.25 12.25"
                   stroke="currentColor"
@@ -215,7 +216,6 @@ export function AppHeader({ title, backHref, showBack = true, rightSlot, userRol
                 />
               </svg>
             </span>
-            <span className="gc-back-btn-label">رجوع</span>
           </button>
         ) : null}
 

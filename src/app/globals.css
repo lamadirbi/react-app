@@ -1010,16 +1010,15 @@ textarea::placeholder {
 
 .gc-back-btn {
   display: inline-flex;
-  height: 2.25rem;
+  height: 2.5rem;
+  width: 2.5rem;
   flex-shrink: 0;
   align-items: center;
-  gap: 0.3rem;
-  border-radius: 999px;
+  justify-content: center;
+  border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--gc-accent) 24%, var(--border));
   background: color-mix(in srgb, var(--gc-accent-soft) 70%, var(--surface));
-  padding: 0 0.9rem 0 0.7rem;
-  font-size: 0.8125rem;
-  font-weight: 700;
+  padding: 0;
   color: #0b6e7a;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset;
   transition:
@@ -1083,8 +1082,8 @@ textarea::placeholder {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--gc-accent) 14%, transparent);
   color: #0b6e7a;
@@ -1094,30 +1093,6 @@ textarea::placeholder {
 .gc-back-btn:hover .gc-back-btn-icon {
   background: color-mix(in srgb, var(--gc-accent) 22%, transparent);
   transform: translateX(1px);
-}
-
-.gc-back-btn-label {
-  line-height: 1;
-}
-
-@media (min-width: 64rem) {
-  .gc-back-btn {
-    height: 2.5rem;
-    padding: 0 1rem 0 0.8rem;
-    font-size: 0.875rem;
-  }
-}
-
-@media (max-width: 380px) {
-  .gc-back-btn-label {
-    display: none;
-  }
-
-  .gc-back-btn {
-    width: 2.5rem;
-    justify-content: center;
-    padding: 0;
-  }
 }
 
 /* ── Confirm modal ── */

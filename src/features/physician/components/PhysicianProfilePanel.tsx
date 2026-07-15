@@ -103,12 +103,28 @@ export function PhysicianProfilePanel({
   );
 
   useEffect(() => {
-    setLocalStatus(verificationStatus ?? profile?.verification_status);
-  }, [verificationStatus, profile?.verification_status]);
+    if (verificationStatus !== undefined) {
+      setLocalStatus(verificationStatus);
+    }
+  }, [verificationStatus]);
 
   useEffect(() => {
-    setLocalReason(rejectionReason ?? profile?.rejection_reason);
-  }, [rejectionReason, profile?.rejection_reason]);
+    if (rejectionReason !== undefined) {
+      setLocalReason(rejectionReason);
+    }
+  }, [rejectionReason]);
+
+  useEffect(() => {
+    if (profile?.verification_status != null) {
+      setLocalStatus(profile.verification_status);
+    }
+  }, [profile?.verification_status]);
+
+  useEffect(() => {
+    if (profile && profile.rejection_reason !== undefined) {
+      setLocalReason(profile.rejection_reason);
+    }
+  }, [profile, profile?.rejection_reason]);
 
   const isRejected = localStatus === "rejected";
   const isPending = localStatus === "pending";
@@ -132,11 +148,19 @@ export function PhysicianProfilePanel({
         setProfile(next);
         if (next.verification_status) setLocalStatus(next.verification_status);
         if (next.rejection_reason !== undefined) setLocalReason(next.rejection_reason);
+        // Keep auth session aligned with server (e.g. after admin rejection).
+        if (next.verification_status) {
+          onVerificationChange?.({
+            verification_status: next.verification_status,
+            rejection_reason: next.rejection_reason ?? null,
+          });
+        }
       })
       .catch(() => {});
     return () => {
       mounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync once on mount
   }, []);
 
   function isCertificateFileImage(f: CertificateFileRef | null | undefined) {

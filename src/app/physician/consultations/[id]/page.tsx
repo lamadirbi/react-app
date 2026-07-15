@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { useRequireAuth } from "@/lib/auth";
 import { AppHeader } from "@/components/AppHeader";
@@ -118,6 +118,7 @@ export default function PhysicianConsultationPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [replying, setReplying] = useState(false);
+  const submitLock = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -145,7 +146,8 @@ export default function PhysicianConsultationPage() {
   }, [id]);
 
   async function submit(markCompleted: boolean) {
-    if (!consultation) return;
+    if (!consultation || saving || submitLock.current) return;
+    submitLock.current = true;
     setSaving(true);
     setError(null);
 
@@ -156,6 +158,7 @@ export default function PhysicianConsultationPage() {
 
     setSaving(false);
     if (!res.ok) {
+      submitLock.current = false;
       setError(res.message);
       return;
     }

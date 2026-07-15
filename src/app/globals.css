@@ -1314,3 +1314,63 @@ textarea::placeholder {
 .gc-notif-item:not(.gc-notif-item-read) {
   background: color-mix(in srgb, var(--gc-accent-soft) 45%, var(--surface));
 }
+
+/* ── List pagination (physician consultations) ── */
+
+.gc-list-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--surface));
+}
+
+.gc-list-pagination-meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.gc-list-pagination-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gc-list-pagination-page {
+  min-width: 3.25rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.gc-list-pagination-btn {
+  height: 2rem;
+  padding: 0 0.85rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--gc-accent) 28%, var(--border));
+  background: var(--surface);
+  color: #0b6e7a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.gc-list-pagination-btn:hover:not(:disabled) {
+  background: var(--gc-accent-soft);
+  border-color: color-mix(in srgb, var(--gc-accent) 48%, var(--border));
+}
+
+.gc-list-pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

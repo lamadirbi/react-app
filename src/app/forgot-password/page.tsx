@@ -70,11 +70,22 @@ export default function ForgotPasswordPage() {
               <div className="mt-6 grid gap-4">
                 <Alert variant={successView.variant}>{successView.message}</Alert>
 
+                {successView.mailpitUrl ? (
+                  <a
+                    href={successView.mailpitUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-center text-sm font-semibold text-(--gc-accent) underline"
+                  >
+                    فتح Mailpit
+                  </a>
+                ) : null}
+
                 {successView.showDemoDetails && (demoToken || demoUrl) ? (
                   <div className="rounded-2xl border border-(--border) bg-(--surface-2) p-4">
                     {demoToken ? (
                       <p className="text-sm">
-                        <span className="font-semibold text-foreground">رمز إعادة التعيين:</span>{" "}
+                        <span className="font-semibold text-foreground">الرمز:</span>{" "}
                         <span className="font-mono font-bold text-(--gc-accent)" dir="ltr">
                           {demoToken}
                         </span>
@@ -86,7 +97,7 @@ export default function ForgotPasswordPage() {
                           href={demoUrl}
                           className="inline-flex items-center gap-1 text-sm font-semibold text-(--gc-accent) underline"
                         >
-                          افتح صفحة إعادة تعيين كلمة المرور
+                          فتح صفحة إعادة التعيين
                         </Link>
                       </p>
                     ) : null}

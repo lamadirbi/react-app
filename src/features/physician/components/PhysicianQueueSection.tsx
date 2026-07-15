@@ -3,6 +3,8 @@
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
+import { ListPagination } from "@/components/ui/ListPagination";
+import { usePagedItems } from "@/components/ui/usePagedItems";
 
 type Consultation = {
   id: number;
@@ -19,7 +21,13 @@ type Props = {
   onClaim: (id: number) => void;
 };
 
+const PAGE_SIZE = 3;
+
 export function PhysicianQueueSection({ queue, loading, error, claimingId, onClaim }: Props) {
+  const { page, setPage, totalPages, pageSize, total, pageItems } = usePagedItems(queue, {
+    pageSize: PAGE_SIZE,
+  });
+
   return (
     <section id="physician-queue" className="scroll-mt-28">
       <div className="mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
@@ -29,7 +37,7 @@ export function PhysicianQueueSection({ queue, loading, error, claimingId, onCla
         استشارات لم يستلمها أي طبيب بعد — يمكنك استلام أي منها للمراجعة.
       </p>
       <div className="grid gap-3">
-        {queue.map((c) => (
+        {pageItems.map((c) => (
           <Card key={c.id}>
             <CardBody className="p-5">
               <div className="flex items-start justify-between gap-4">
@@ -63,8 +71,15 @@ export function PhysicianQueueSection({ queue, loading, error, claimingId, onCla
         {!loading && !error && queue.length === 0 ? (
           <Alert variant="info">لا توجد استشارات بانتظار الاستلام حالياً.</Alert>
         ) : null}
+
+        <ListPagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={pageSize}
+          onPageChange={setPage}
+        />
       </div>
     </section>
   );
 }
-

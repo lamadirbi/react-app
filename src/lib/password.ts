@@ -12,13 +12,14 @@ export type ForgotPasswordSuccessView = {
   variant: "success" | "info";
   message: string;
   showDemoDetails: boolean;
+  mailpitUrl?: string | null;
 };
 
 export function getForgotPasswordFormHint(): string {
   if (MOCK_MODE) {
-    return "في النسخة التجريبية لا نُرسل بريداً حقيقياً. أدخل بريد حساب تجريبي وسيظهر رابط إعادة التعيين هنا مباشرة.";
+    return "أدخل بريد حساب تجريبي ليظهر رابط إعادة التعيين هنا.";
   }
-  return "أدخل بريدك الإلكتروني. إذا كان مسجّلاً لدينا سنرسل إليه رابط إعادة تعيين كلمة المرور.";
+  return "أدخل بريدك الإلكتروني لإرسال رابط إعادة التعيين.";
 }
 
 export function getForgotPasswordSuccessView(
@@ -29,15 +30,13 @@ export function getForgotPasswordSuccessView(
     if (demoToken || demoUrl) {
       return {
         variant: "success",
-        message:
-          "تم تجهيز رابط إعادة التعيين. في النسخة التجريبية لا يُرسل بريد حقيقي — استخدم الرابط أو الرمز أدناه.",
+        message: "تم تجهيز الرابط. استخدميه أدناه.",
         showDemoDetails: true,
       };
     }
     return {
       variant: "info",
-      message:
-        "لم يُعثر على بريد مسجّل بهذا الاسم. جرّب أحد حسابات «دخول سريع» من صفحة تسجيل الدخول (مثل sara.ahmad@gazacare.ps).",
+      message: "البريد غير مسجّل. جرّبي حساباً من «دخول سريع».",
       showDemoDetails: false,
     };
   }
@@ -46,18 +45,11 @@ export function getForgotPasswordSuccessView(
     typeof window !== "undefined" &&
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
-  let message =
-    "إذا كان بريدك مسجّلاً لدينا، أرسلنا إليه رسالة تحتوي رابط إعادة تعيين كلمة المرور. راجعي صندوق الوارد والرسائل غير المرغوب فيها.";
-
-  if (isLocal) {
-    message +=
-      " على السيرفر المحلي: إن لم يصل بريد، ابحثي عن الرابط في ملف storage/logs/laravel.log.";
-  }
-
   return {
     variant: "success",
-    message,
+    message: isLocal ? "تم الإرسال. افتحي Mailpit لرؤية الرسالة." : "تم الإرسال. راجعي بريدك.",
     showDemoDetails: !!(demoToken || demoUrl),
+    mailpitUrl: isLocal ? "http://127.0.0.1:8025" : null,
   };
 }
 

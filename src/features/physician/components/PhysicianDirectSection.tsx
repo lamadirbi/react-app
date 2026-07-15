@@ -1,6 +1,8 @@
 "use client";
 
 import { Alert } from "@/components/ui/Alert";
+import { ListPagination } from "@/components/ui/ListPagination";
+import { usePagedItems } from "@/components/ui/usePagedItems";
 import { ConsultationCard } from "@/features/consultations/components/ConsultationCard";
 
 type Consultation = {
@@ -19,7 +21,13 @@ type Props = {
   error: string | null;
 };
 
+const PAGE_SIZE = 3;
+
 export function PhysicianDirectSection({ items, loading, error }: Props) {
+  const { page, setPage, totalPages, pageSize, total, pageItems } = usePagedItems(items, {
+    pageSize: PAGE_SIZE,
+  });
+
   return (
     <section id="physician-direct" className="mt-10 scroll-mt-28">
       <div className="mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
@@ -29,7 +37,7 @@ export function PhysicianDirectSection({ items, loading, error }: Props) {
         استشارات وجّهها المراجع إليك مباشرة.
       </p>
       <div className="grid gap-3">
-        {items.map((c) => (
+        {pageItems.map((c) => (
           <ConsultationCard
             key={c.id}
             id={c.id}
@@ -47,6 +55,14 @@ export function PhysicianDirectSection({ items, loading, error }: Props) {
         {!loading && !error && items.length === 0 ? (
           <Alert variant="info">لا توجد استشارات موجّهة إليك مباشرة حالياً.</Alert>
         ) : null}
+
+        <ListPagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={pageSize}
+          onPageChange={setPage}
+        />
       </div>
     </section>
   );

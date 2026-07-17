@@ -13,6 +13,8 @@ import { ConsultationDetailHeader } from "@/features/consultations/components/Co
 import { ConsultationThread, PhysicianResponseForm } from "@/features/consultations";
 import { postConsultationMessage, type ConsultationMessage } from "@/features/consultations";
 import { MedicalProfileSummaryCard } from "@/features/profile";
+import { formatPatientWithRelationship } from "@/lib/caregiver";
+import type { CaseSeverity } from "@/lib/caseSeverity";
 
 type MedicalFileRow = {
   id: number;
@@ -44,6 +46,8 @@ type Consultation = {
     name: string;
     email?: string;
     role: string;
+    caregiver_mode_enabled?: boolean;
+    caregiver_relationship?: string | null;
     medicalProfile?: MedicalProfileRow | null;
   };
   physician?: {
@@ -99,6 +103,8 @@ function normalizeConsultation(raw: Record<string, unknown>): Consultation {
           id: patient.id as number,
           name: patient.name as string,
           role: patient.role as string,
+          caregiver_mode_enabled: Boolean(patient.caregiver_mode_enabled),
+          caregiver_relationship: (patient.caregiver_relationship as string | null | undefined) ?? null,
           medicalProfile: medProf,
         }
       : undefined,
@@ -115,6 +121,7 @@ export default function PhysicianConsultationPage() {
 
   const [consultation, setConsultation] = useState<Consultation | null>(null);
   const [response, setResponse] = useState("");
+  const [caseSeverity, setCaseSeverity] = useState<CaseSeverity | "">("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [replying, setReplying] = useState(false);
@@ -153,7 +160,7 @@ export default function PhysicianConsultationPage() {
 
     const res = await apiFetch<ShowResponse>(`/consultations/${consultation.id}/respond`, {
       method: "POST",
-      body: JSON.stringify({ response, mark_completed: markCompleted }),
+      body: JSON.stringify({ response, mark_completed: markCompleted, case_severity: caseSeverity }),
     });
 
     setSaving(false);
@@ -213,7 +220,10 @@ export default function PhysicianConsultationPage() {
               />
               {consultation.patient?.name ? (
                 <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                  المراجع: <span className="font-medium text-foreground">{consultation.patient.name}</span>
+                  المراجع:{" "}
+                  <span className="font-medium text-foreground">
+                    {formatPatientWithRelationship(consultation.patient)}
+                  </span>
                 </div>
               ) : null}
 
@@ -260,6 +270,8 @@ export default function PhysicianConsultationPage() {
                 <PhysicianResponseForm
                   value={response}
                   onChange={setResponse}
+                  severity={caseSeverity}
+                  onSeverityChange={setCaseSeverity}
                   saving={saving}
                   onSubmitReview={() => submit(false)}
                   onSubmitComplete={() => submit(true)}

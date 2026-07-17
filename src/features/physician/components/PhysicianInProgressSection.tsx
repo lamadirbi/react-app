@@ -4,6 +4,7 @@ import { Alert } from "@/components/ui/Alert";
 import { ListPagination } from "@/components/ui/ListPagination";
 import { usePagedItems } from "@/components/ui/usePagedItems";
 import { ConsultationCard } from "@/features/consultations/components/ConsultationCard";
+import { formatPatientWithRelationship } from "@/lib/caregiver";
 
 type Consultation = {
   id: number;
@@ -12,7 +13,11 @@ type Consultation = {
   submitted_at: string;
   physician_response?: string | null;
   assignment_mode?: "queue" | "direct";
-  patient?: { name: string } | null;
+  patient?: {
+    name: string;
+    caregiver_mode_enabled?: boolean;
+    caregiver_relationship?: string | null;
+  } | null;
 };
 
 type Props = {
@@ -48,7 +53,7 @@ export function PhysicianInProgressSection({ items, loading, error }: Props) {
             href={`/physician/consultations/${c.id}`}
             ctaLabel="متابعة الرد"
             variant="physician"
-            patientName={c.patient?.name ?? null}
+            patientName={c.patient ? formatPatientWithRelationship(c.patient) : null}
             assignmentMode={c.assignment_mode ?? "queue"}
           />
         ))}

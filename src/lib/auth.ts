@@ -9,6 +9,8 @@ export type MeUser = {
   email: string;
   role: string;
   is_disabled?: boolean;
+  caregiver_mode_enabled?: boolean;
+  caregiver_relationship?: string | null;
   physician_profile?: {
     specialty: string;
     certificate: string;

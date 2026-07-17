@@ -26,6 +26,7 @@ import {
   type MedicalFile,
   type PhysicianProfileData,
 } from "@/features/consultations";
+import { CaseSeverityBadge } from "@/components/CaseSeverityBadge";
 
 function normalizeMessages(raw: ConsultationDetail): ConsultationMessage[] {
   const list = (raw.messages ?? []) as ConsultationMessage[];
@@ -368,6 +369,11 @@ export default function ConsultationDetailPage() {
                         {consultation.physician.name}
                       </button>
                     </p>
+                  ) : null}
+                  {hasPhysicianReply && consultation.case_severity ? (
+                    <div className="mb-4">
+                      <CaseSeverityBadge severity={consultation.case_severity} />
+                    </div>
                   ) : null}
                   <ConsultationThread
                     messages={messages}

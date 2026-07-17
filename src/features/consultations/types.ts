@@ -41,6 +41,7 @@ export type ConsultationListItem = {
   submitted_at: string;
   responded_at?: string | null;
   physician_response?: string | null;
+  case_severity?: string | null;
   physician_id?: number | null;
   assignment_mode?: "queue" | "direct";
   physician?: {

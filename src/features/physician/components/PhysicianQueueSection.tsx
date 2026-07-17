@@ -5,12 +5,17 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { ListPagination } from "@/components/ui/ListPagination";
 import { usePagedItems } from "@/components/ui/usePagedItems";
+import { formatPatientWithRelationship } from "@/lib/caregiver";
 
 type Consultation = {
   id: number;
   question_text: string;
   submitted_at: string;
-  patient?: { name: string } | null;
+  patient?: {
+    name: string;
+    caregiver_mode_enabled?: boolean;
+    caregiver_relationship?: string | null;
+  } | null;
 };
 
 type Props = {
@@ -47,7 +52,8 @@ export function PhysicianQueueSection({ queue, loading, error, claimingId, onCla
                   </div>
                   {c.patient?.name ? (
                     <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                      المراجع: <span className="font-medium">{c.patient.name}</span>
+                      المراجع:{" "}
+                      <span className="font-medium">{formatPatientWithRelationship(c.patient)}</span>
                     </div>
                   ) : null}
                   <div className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">

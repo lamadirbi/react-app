@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { useRequireAuth } from "@/lib/auth";
+import { useRequireAuth, setAuthSession } from "@/lib/auth";
+import { apiFetch } from "@/lib/api";
 import { AppHeader } from "@/components/AppHeader";
 import { PageLoadingGate } from "@/components/PageLoadingGate";
 import Link from "next/link";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
+import { CaregiverModeModal } from "@/components/CaregiverModeModal";
+import { caregiverRelationshipLabel } from "@/lib/caregiver";
+import type { CaregiverRelationship } from "@/lib/caregiver";
 
 type MedicalProfile = {
   height_cm: number | null;
@@ -20,6 +24,9 @@ type MedicalProfile = {
 export default function DashboardPage() {
   const { user, loading, error } = useRequireAuth();
   const [profile, setProfile] = useState<MedicalProfile | null>(null);
+  const [caregiverModalOpen, setCaregiverModalOpen] = useState(false);
+  const [caregiverSaving, setCaregiverSaving] = useState(false);
+  const [caregiverError, setCaregiverError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.role !== "admin") return;
@@ -64,6 +71,46 @@ export default function DashboardPage() {
     return "مستخدم";
   }
 
+  async function toggleCaregiverMode() {
+    if (!user || user.role !== "patient") return;
+
+    if (user.caregiver_mode_enabled) {
+      setCaregiverSaving(true);
+      setCaregiverError(null);
+      const res = await apiFetch<{ user: typeof user }>("/caregiver-mode", {
+        method: "PATCH",
+        body: JSON.stringify({ enabled: false }),
+      });
+      setCaregiverSaving(false);
+      if (!res.ok) {
+        setCaregiverError(res.message);
+        return;
+      }
+      setAuthSession(res.data.user);
+      window.location.reload();
+      return;
+    }
+
+    setCaregiverModalOpen(true);
+  }
+
+  async function confirmCaregiverMode(relationship: CaregiverRelationship) {
+    setCaregiverSaving(true);
+    setCaregiverError(null);
+    const res = await apiFetch<{ user: NonNullable<typeof user> }>("/caregiver-mode", {
+      method: "PATCH",
+      body: JSON.stringify({ enabled: true, relationship }),
+    });
+    setCaregiverSaving(false);
+    if (!res.ok) {
+      setCaregiverError(res.message);
+      return;
+    }
+    setCaregiverModalOpen(false);
+    setAuthSession(res.data.user);
+    window.location.reload();
+  }
+
   return (
     <PageLoadingGate loading={loading} message="جاري تجهيز لوحة التحكم...">
     <div className="min-h-[calc(100vh-0px)] bg-transparent">
@@ -86,6 +133,44 @@ export default function DashboardPage() {
             <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
               لوحة التحكم
             </h1>
+
+            {user?.role === "patient" ? (
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-xs text-(--muted)">
+                  {user.caregiver_mode_enabled && user.caregiver_relationship ? (
+                    <>
+                      وضع مقدم الرعاية مفعّل — صلة القرابة:{" "}
+                      <span className="font-medium text-foreground">
+                        {caregiverRelationshipLabel(user.caregiver_relationship)}
+                      </span>
+                    </>
+                  ) : (
+                    "يمكنك تفعيل وضع مقدم الرعاية إذا كنت تقدّم استشارات نيابة عن قريب."
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant={user.caregiver_mode_enabled ? "secondary" : "primary"}
+                  size="sm"
+                  className="shrink-0"
+                  disabled={caregiverSaving}
+                  onClick={toggleCaregiverMode}
+                >
+                  {caregiverSaving
+                    ? "جاري الحفظ..."
+                    : user.caregiver_mode_enabled
+                      ? "إيقاف وضع مقدم الرعاية"
+                      : "تفعيل وضع مقدم الرعاية"}
+                </Button>
+              </div>
+            ) : null}
+
+            {caregiverError ? (
+              <Alert variant="error" className="mt-3">
+                {caregiverError}
+              </Alert>
+            ) : null}
+
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
               {user ? (
                 <>
@@ -249,6 +334,18 @@ export default function DashboardPage() {
           </CardBody>
         </Card>
       </main>
+
+      {user?.role === "patient" ? (
+        <CaregiverModeModal
+          open={caregiverModalOpen}
+          initialRelationship={user.caregiver_relationship}
+          saving={caregiverSaving}
+          onConfirm={confirmCaregiverMode}
+          onClose={() => {
+            if (!caregiverSaving) setCaregiverModalOpen(false);
+          }}
+        />
+      ) : null}
     </div>
     </PageLoadingGate>
   );

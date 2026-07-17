@@ -8,6 +8,7 @@ import { PageLoadingGate } from "@/components/PageLoadingGate";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
+import { formatPatientWithRelationship } from "@/lib/caregiver";
 
 type UserRow = {
   id: number;
@@ -15,6 +16,8 @@ type UserRow = {
   email: string;
   role: string;
   is_disabled?: boolean;
+  caregiver_mode_enabled?: boolean;
+  caregiver_relationship?: string | null;
   physician_profile?: { specialty?: string; verification_status?: string } | null;
 };
 
@@ -113,7 +116,11 @@ export default function AdminUsersPage() {
                   <tbody>
                     {rows.map((row) => (
                       <tr key={row.id} className="border-b border-(--border)">
-                        <td className="px-3 py-3 font-medium">{row.name}</td>
+                        <td className="px-3 py-3 font-medium">
+                          {row.role === "patient"
+                            ? formatPatientWithRelationship(row)
+                            : row.name}
+                        </td>
                         <td className="px-3 py-3" dir="ltr">{row.email}</td>
                         <td className="px-3 py-3">{roleLabels[row.role] ?? row.role}</td>
                         <td className="px-3 py-3">
